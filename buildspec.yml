@@ -1,0 +1,21 @@
+version: 0.1
+phases:
+  install:
+    commands:
+      - yum install -y python36-devel tree
+      - pip3 install --upgrade pip
+  pre_build:
+    commands:
+      - mkdir build
+      - cp -r src/* build/
+      - cp SamTemplate.json build/
+      - touch requirements.txt
+      - pip3 install -t build/ -r requirements.txt
+  build:
+    commands:
+      - aws cloudformation package --template-file SamTemplate.json --s3-bucket $S3_BUCKET --output-template-file NewSamTemplate.json --use-json
+artifacts:
+  type: zip
+  files:
+    - NewSamTemplate.json
+  discard-paths: yes

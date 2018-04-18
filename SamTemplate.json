@@ -1,0 +1,137 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Grapefruit-Coach image training stack.",
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Resources": {
+        "GrapefruitFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "Environment":{
+                    "Variables":{"STACK_NAME":{"Ref":"AWS::StackName"}}
+                },
+                "CodeUri": "./build/",
+                "Events": {
+                    "ProxyGet": {
+                        "Properties": {
+                            "Method": "GET",
+                            "Path": "/{proxy+}"
+                        },
+                        "Type": "Api"
+                    },
+                    "ProxyPost": {
+                        "Properties": {
+                            "Method": "POST",
+                            "Path": "/{proxy+}"
+                        },
+                        "Type": "Api"
+                    },
+                    "ProxylessGet": {
+                        "Properties": {
+                            "Method": "GET",
+                            "Path": "/"
+                        },
+                        "Type": "Api"
+                    },
+                    "ProxylessPost": {
+                        "Properties": {
+                            "Method": "POST",
+                            "Path": "/"
+                        },
+                        "Type": "Api"
+                    }
+                },
+                "Handler": "grapefruit.lambda_handler",
+                "Runtime": "python3.6",
+                "Role":{"Fn::GetAtt":["LambdaRole","Arn"]},
+                "Timeout":10,
+                "MemorySize":128
+            }
+        },
+        "PhotoBucket":{
+            "Type":"AWS::S3::Bucket",
+            "DependsOn":"Permission",
+            "Properties":{
+                "AccessControl": "BucketOwnerFullControl",
+                "NotificationConfiguration": {
+                    "LambdaConfigurations":[
+                        {
+                            "Event":"s3:ObjectCreated:*",
+                            "Function":{ "Fn::GetAtt": ["GrapefruitFunction", "Arn"] }
+                        }
+                    ]
+                }
+            }
+        },
+        "LambdaRole":{
+            "Type":"AWS::IAM::Role",
+            "Properties":{
+                "AssumeRolePolicyDocument":{
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path":"/",
+                "ManagedPolicyArns":[{"Fn::Sub":"arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"}]
+            }
+        },
+        "Permission":{
+            "Type":"AWS::Lambda::Permission",
+            "Properties":{
+                "FunctionName": { "Ref": "GrapefruitFunction" },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "s3.amazonaws.com",
+                "SourceArn": {"Fn::Sub":"arn:${AWS::Partition}:s3:::*"}
+            }
+        },
+        "ImageTable":{
+            "Type":"AWS::DynamoDB::Table",
+            "Properties":{
+                "AttributeDefinitions": [{"AttributeName": "image_name","AttributeType": "S"}],
+                "KeySchema": [{"AttributeName": "image_name","KeyType": "HASH"}],
+                "ProvisionedThroughput": {"ReadCapacityUnits": "1","WriteCapacityUnits": "1"}
+            }
+        },
+        "ObjectTable":{
+            "Type":"AWS::DynamoDB::Table",
+            "DependsOn":"ImageTable",
+            "Properties":{
+                "AttributeDefinitions": [{"AttributeName": "image_name","AttributeType": "S"}, {"AttributeName": "object_id","AttributeType": "S"}, {"AttributeName": "category","AttributeType": "S"}],
+                "KeySchema": [{"AttributeName": "image_name","KeyType": "HASH"}, {"AttributeName": "object_id","KeyType": "RANGE"}],
+                "ProvisionedThroughput": {"ReadCapacityUnits": "1","WriteCapacityUnits": "1"},
+                "GlobalSecondaryIndexes": [{
+                    "IndexName" : "category-index",
+                    "KeySchema" : [ {"AttributeName": "category","KeyType": "HASH"} ],
+                    "Projection" : {
+                        "ProjectionType" : "ALL"
+                    },
+                    "ProvisionedThroughput" : { "ReadCapacityUnits": "1","WriteCapacityUnits": "1" }
+                }]
+            }
+        },
+        "UserTable":{
+            "Type":"AWS::DynamoDB::Table",
+            "DependsOn":"ObjectTable",
+            "Properties":{
+                "AttributeDefinitions": [{"AttributeName": "email","AttributeType": "S"}],
+                "KeySchema": [{"AttributeName": "email","KeyType": "HASH"}],
+                "ProvisionedThroughput": {"ReadCapacityUnits": "1","WriteCapacityUnits": "1"}
+            }
+        }
+    },
+    "Outputs":{
+        "PhotoBucket":{
+            "Value":{"Ref":"PhotoBucket"}
+        }
+    }
+}
