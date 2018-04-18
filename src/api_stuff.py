@@ -3,17 +3,14 @@ import json
 
 import ui_stuff
 
-def make_response(body, code=200, headers={"Content-Type": "text/html"}, base64=False):
-    return {
-        "body": body,
-        "statusCode": code,
-        "headers": headers,
-        "isBase64Encoded": base64
-    }
+from response_core import make_response
 
 def handle_api_call(event, context):
-    if event.get("path", None) in ["","/","index.html","/index.html"]:
+    path = event.get("path")
+    if path in ["","/","index.html","/index.html"]:
         return make_response(ui_stuff.get_page("index.html", event=event))
+    if path.startswith("/static"):
+        return ui_stuff.get_static(path[1:])
     return make_response(body="<pre>\n{}\n</pre>".format(json.dumps(event, indent=2, sort_keys=True)))
 
 '''
