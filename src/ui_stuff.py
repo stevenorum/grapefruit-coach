@@ -7,7 +7,7 @@ def get_params(template_name, event=None, **kwargs):
     host = event.get("headers",{}).get("Host", None)
     stage = event.get("requestContext", {}).get("stage","")
     if "execute-api" in host:
-        params{"base_path"} = "/{}".format(stage)
+        params["base_path"] = "/{}".format(stage)
     params.update(kwargs)
     return params
 
