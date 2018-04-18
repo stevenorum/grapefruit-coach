@@ -3,11 +3,16 @@
     "Description": "Grapefruit-Coach image training stack.",
     "Transform": "AWS::Serverless-2016-10-31",
     "Resources": {
-        "GrapefruitFunction": {
+        "GrapefruitApiFunction": {
             "Type": "AWS::Serverless::Function",
             "Properties": {
                 "Environment":{
-                    "Variables":{"STACK_NAME":{"Ref":"AWS::StackName"}}
+                    "Variables":{
+                        "STACK_NAME":{"Ref":"AWS::StackName"},
+                        "IMAGE_TABLE":{"Ref":"ImageTable"},
+                        "OBJECT_TABLE":{"Ref":"ObjectTable"},
+                        "USER_TABLE":{"Ref":"UserTable"}
+                    }
                 },
                 "CodeUri": "./build/",
                 "Events": {
@@ -40,7 +45,26 @@
                         "Type": "Api"
                     }
                 },
-                "Handler": "grapefruit.lambda_handler",
+                "Handler": "handlers.apigateway_handler",
+                "Runtime": "python3.6",
+                "Role":{"Fn::GetAtt":["LambdaRole","Arn"]},
+                "Timeout":10,
+                "MemorySize":128
+            }
+        },
+        "GrapefruitS3Function": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "Environment":{
+                    "Variables":{
+                        "STACK_NAME":{"Ref":"AWS::StackName"},
+                        "IMAGE_TABLE":{"Ref":"ImageTable"},
+                        "OBJECT_TABLE":{"Ref":"ObjectTable"},
+                        "USER_TABLE":{"Ref":"UserTable"}
+                    }
+                },
+                "CodeUri": "./build/",
+                "Handler": "handlers.s3_handler",
                 "Runtime": "python3.6",
                 "Role":{"Fn::GetAtt":["LambdaRole","Arn"]},
                 "Timeout":10,
@@ -56,7 +80,7 @@
                     "LambdaConfigurations":[
                         {
                             "Event":"s3:ObjectCreated:*",
-                            "Function":{ "Fn::GetAtt": ["GrapefruitFunction", "Arn"] }
+                            "Function":{ "Fn::GetAtt": ["GrapefruitS3Function", "Arn"] }
                         }
                     ]
                 }
@@ -88,7 +112,7 @@
         "Permission":{
             "Type":"AWS::Lambda::Permission",
             "Properties":{
-                "FunctionName": { "Ref": "GrapefruitFunction" },
+                "FunctionName": { "Ref": "GrapefruitS3Function" },
                 "Action": "lambda:InvokeFunction",
                 "Principal": "s3.amazonaws.com",
                 "SourceArn": {"Fn::Sub":"arn:${AWS::Partition}:s3:::*"}
