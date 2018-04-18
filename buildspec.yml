@@ -5,6 +5,7 @@ phases:
       - pip install awscli --upgrade
       - yum install -y python36-devel tree
       - pip3 install --upgrade pip
+      - pip3 install awscli --upgrade
   pre_build:
     commands:
       - mkdir build
