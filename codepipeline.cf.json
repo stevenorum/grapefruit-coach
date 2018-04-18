@@ -250,7 +250,9 @@
                                 "logs:*",
                                 "lambda:*",
                                 "cloudformation:*",
-                                "apigateway:*"
+                                "apigateway:*",
+                                "dynamodb:*",
+                                "ses:*"
                             ],
                             "Resource": "*",
                             "Effect": "Allow"
@@ -478,7 +480,7 @@
                                             "Arn"
                                         ]
                                     },
-                                    "TemplatePath": "BuildArtifacts::NewSamTemplate.yml",
+                                    "TemplatePath": "BuildArtifacts::NewSamTemplate.json",
                                     "Capabilities": "CAPABILITY_IAM"
                                 },
                                 "InputArtifacts": [
