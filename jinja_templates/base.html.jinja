@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<!--
+    Theory by TEMPLATED
+    templated.co @templatedco
+    Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html>
+  <head>
+    <title>GrapefruitCoach</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ base_path }}/static/css/main.css" />
+
+    <!-- Header -->
+    <header id="header">
+
+      <div class="inner">
+        <a href="{{ base_path }}/index.html" class="logo"><white>Minty Llama</white></a>
+        <nav id="nav">
+          <a href="/index.html">Dashboard</a>
+          <!-- <a href="{{ page_url_w_slash }}about.html">About</a> -->
+          <!-- <a href="{{ page_url_w_slash }}input.html">API test page</a> -->
+        </nav>
+        <a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+      </div>
+    </header>
+    {% block head %}{% endblock %}
+  </head>
+  <body class="subpage">
+
+    {% block body %}{% endblock %}
+    <!-- Footer -->
+    <footer id="footer">
+      <div class="inner">
+        <div class="flex">
+          <div class="copyright align-center">
+            <p>&copy; Design: <a href="https://templated.co">TEMPLATED</a>.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ base_path }}/static/js/jquery.min.js"></script>
+    <script src="{{ base_path }}/static/js/skel.min.js"></script>
+    <script src="{{ base_path }}/static/js/util.js"></script>
+    <script src="{{ base_path }}/static/js/main.js"></script>
+
+  </body>
+</html>

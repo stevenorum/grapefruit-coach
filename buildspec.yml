@@ -10,6 +10,8 @@ phases:
     commands:
       - mkdir build
       - cp -r src/* build/
+      - cp -r static build/
+      - cp -r jinja_templates build/
       - cp SamTemplate.json build/
       - touch requirements.txt
       - pip3 install -t build/ -r requirements.txt

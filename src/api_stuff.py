@@ -1,6 +1,8 @@
 import boto3
 import json
 
+import ui_stuff
+
 def make_response(body, code=200, headers={"Content-Type": "text/html"}, base64=False):
     return {
         "body": body,
@@ -10,6 +12,8 @@ def make_response(body, code=200, headers={"Content-Type": "text/html"}, base64=
     }
 
 def handle_api_call(event, context):
+    if path in ["","/","index.html","/index.html"]:
+        return make_response(ui_stuff.get_page("index.html", event=event))
     return make_response(body="<pre>\n{}\n</pre>".format(json.dumps(event, indent=2, sort_keys=True)))
 
 '''
