@@ -9,7 +9,7 @@ phases:
   pre_build:
     commands:
       - mkdir build
-      - upload_static_assets.sh build/static_config.json
+      - ./upload_static_assets.sh build/static_config.json
       - cp -r src/* build/
       - cp -r static build/
       - cp -r jinja_templates build/
