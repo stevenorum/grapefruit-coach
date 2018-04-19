@@ -2,11 +2,16 @@ import boto3
 import json
 import traceback
 
+from orm import Image
+
 def handle_s3_event(event, context):
     for record in event.get("Records"):
         try:
             bucket = record["s3"]["bucket"]["name"]
             key = record["s3"]["object"]["key"]
+            image = Image(image_name=key)
+            image.save()
+
             who = record["userIdentity"]["principalId"]
             what = record["eventName"]
             when = record["eventTime"]
