@@ -5,8 +5,10 @@ from response_core import PathMatcher
 
 MATCHERS = [
     PathMatcher(r"^/?$", ui_stuff.get_page, {"template_name":"index.html"}),
-    PathMatcher(r"^/?(?P<static_file>static/.*)$", ui_stuff.get_static),
+    PathMatcher(r"^/?(?P<filename>static/.*)$", ui_stuff.get_static),
     PathMatcher(r"^/?(?P<template_name>[-0-9a-zA-Z_]*.htm(l)?)$", ui_stuff.get_page),
+    PathMatcher(r"^/?images/(?P<next_token>[-_0-9a-zA-Z=%]*)$", ui_stuff.image_list),
+    PathMatcher(r".*debug.*", ui_stuff.make_debug),
 ]
 
 def handle_api_call(event, context):
@@ -16,8 +18,6 @@ def handle_api_call(event, context):
             function = match[0]
             kwargs = match[1]
             return function(**kwargs)
-    if "debug" in path.lower():
-        return ui_stuff.make_debug(event=event)
     return ui_stuff.make_404(event=event)
 
 '''
