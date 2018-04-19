@@ -84,5 +84,7 @@ def make_404(event=None, **kwargs):
     return make_message("<p>I have no idea what you're talking about.</p>", heading="HTTP/404 !!1!", code=404)
 
 def image_list(next_token=None, event=None, **kwargs):
-    images = Image.scan(NextToken=next_token)
-    image_links = []
+    scan_response = Image.scan(NextToken=next_token)
+    images = scan_response["Items"]
+    next_next_token = scan_response.get("NextToken")
+    return get_page(template_name="images.html", images=images, next_token=next_next_token)

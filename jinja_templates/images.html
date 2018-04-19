@@ -1,0 +1,19 @@
+{% extends "base.html.jinja" %}
+{% block body %}
+<section id="three" class="wrapper">
+    <div class="inner">
+        <header class="align-center">
+            <h2>Images</h2>
+            <p>These are some of the images we currently know about.</p>
+            {% if next_token %}
+            <h3><a href="{{ base_path }}/images/{{ next_token }}">[Next block of images.]</a></h3>
+            {% endif %}
+        </header>
+        <ul>
+          {% for image in images %}
+          <li><a href="{{ image._temp_url }}">{{ image.image_id }}</a></li>
+          {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endblock %}
