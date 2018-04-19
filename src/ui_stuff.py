@@ -1,4 +1,5 @@
 import base64
+import json
 import os
 
 from jinja2 import Environment, FileSystemLoader
@@ -49,13 +50,18 @@ def get_params(template_name, event=None, **kwargs):
     stage = event.get("requestContext", {}).get("stage","")
     if "execute-api" in host:
         params["base_path"] = "/{}".format(stage)
+
     params.update(kwargs)
     return params
 
-def get_page(template_name, event=None):
-    return env.get_template(template_name).render(**get_params(template_name, event))
+def get_page(template_name, event=None, **kwargs):
+    return make_response(env.get_template(template_name).render(**get_params(template_name, event)))
 
-def get_static(filename):
+def make_message(message, heading="Grapefruit Coach", **kwargs):
+    body = env.get_template("message.html.jinja").render(message_title=heading, message_html=message)
+    return make_response(body, **kwargs)
+
+def get_static(filename, event=None, **kwargs):
     filepath = os.path.abspath(os.path.join("/var/task",filename))
     if os.path.isfile(filepath) and filepath.startswith("/var/task/static/"):
         content_type = get_content_type(filename)
@@ -70,3 +76,13 @@ def get_static(filename):
         return make_response(body=body, headers={"Content-Type": content_type}, base64=b64encoded)
     else:
         return make_response("404!!1!", code=404)
+
+def make_debug(event, **kwargs):
+    return make_response(body="<pre>\n{}\n</pre>".format(json.dumps(event, indent=2, sort_keys=True)))
+    
+def make_404(event=None, **kwargs):
+    return make_message("<p>I have no idea what you're talking about.</p>", heading="HTTP/404 !!1!", code=404)
+
+def image_list(next_token=None, event=None, **kwargs):
+    images = Image.scan(NextToken=next_token)
+    image_links = []

@@ -1,3 +1,5 @@
+{% extends "default_values.jinja" %}
+{% block html_template %}
 <!DOCTYPE HTML>
 <!--
     Theory by TEMPLATED
@@ -6,7 +8,7 @@
 -->
 <html>
   <head>
-    <title>GrapefruitCoach</title>
+    <title>{{ title }}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="{{ base_path }}/static/css/main.css" />
@@ -48,3 +50,4 @@
 
   </body>
 </html>
+{% endblock %}

@@ -16,7 +16,7 @@ def handle_s3_event(event, context):
             message = "Around {when}, user {who} performed action {what} on object {key} in bucket {bucket}".format(bucket=bucket, key=key, who=who, what=what, when=when)
             print(message)
 
-            image = Image(image_name=key)
+            image = Image(image_name=key, s3key=key, s3bucket=bucket)
             image._save()
 
         except:

@@ -1,17 +1,24 @@
 import boto3
-import json
-
 import ui_stuff
 
-from response_core import make_response
+from response_core import PathMatcher
+
+MATCHERS = [
+    PathMatcher(r"^/?$", ui_stuff.get_page, {"template_name":"index.html"}),
+    PathMatcher(r"^/?(?P<static_file>static/.*)$", ui_stuff.get_static),
+    PathMatcher(r"^/?(?P<template_name>[-0-9a-zA-Z_]*.htm(l)?)$", ui_stuff.get_page),
+]
 
 def handle_api_call(event, context):
-    path = event.get("path")
-    if path in ["","/","index.html","/index.html"]:
-        return make_response(ui_stuff.get_page("index.html", event=event))
-    if path.startswith("/static"):
-        return ui_stuff.get_static(path[1:])
-    return make_response(body="<pre>\n{}\n</pre>".format(json.dumps(event, indent=2, sort_keys=True)))
+    for m in MATCHERS:
+        match = m.match_event(event)
+        if match:
+            function = match[0]
+            kwargs = match[1]
+            return function(**kwargs)
+    if "debug" in path.lower():
+        return ui_stuff.make_debug(event=event)
+    return ui_stuff.make_404(event=event)
 
 '''
 
