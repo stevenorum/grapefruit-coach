@@ -9,11 +9,13 @@
             <h3><a href="{{ base_path }}/images/{{ next_token }}">[Next block of images.]</a></h3>
             {% endif %}
         </header>
+        {% if images %}
         <ul>
           {% for image in images %}
-          <li><a href="{{ image._temp_url }}">{{ image.image_id }}</a></li>
+          <li><a href="{{ image._temp_url }}">{{ image.image_name }}</a></li>
           {% endfor %}
         </ul>
+        {% endif %}
     </div>
 </section>
 {% endblock %}

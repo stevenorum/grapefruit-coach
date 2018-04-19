@@ -89,5 +89,6 @@ def image_list(next_token=None, event=None, **kwargs):
     next_token = None if not next_token else next_token.strip("/")
     scan_response = Image.scan(NextToken=next_token)
     images = scan_response["Items"]
+    print("Images found: {}".format(", ".join(image.image_name for image in images)))
     next_next_token = scan_response.get("NextToken")
     return get_page(template_name="images.html", images=images, next_token=next_next_token, event=event)
