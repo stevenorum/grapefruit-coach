@@ -48,16 +48,18 @@ def get_content_type(fname, body=None):
 def get_params(template_name, event=None, **kwargs):
     params = {"base_path":""}
     if event:
-        host = event.get("headers",{}).get("Host", None)
-        # Need to improve this logic a bit, but it works for the ones I'm currently using.
-        if "execute-api" in host:
-            stage = event.get("requestContext", {}).get("stage","")
-            params["base_path"] = "/{}".format(stage)
+        # I think this should work...
+        params["base_path"] = event["requestContext"]["path"][:-1*len(event["path"])].rstrip("/")
+        # host = event.get("headers",{}).get("Host", None)
+        # # Need to improve this logic a bit, but it works for the ones I'm currently using.
+        # if "execute-api" in host:
+        #     stage = event.get("requestContext", {}).get("stage","")
+        #     params["base_path"] = "/{}".format(stage)
     params.update(kwargs)
     return params
 
 def get_page(template_name, event=None, **kwargs):
-    return make_response(env.get_template(template_name).render(**get_params(template_name, event)))
+    return make_response(env.get_template(template_name).render(**get_params(template_name, event, **kwargs)))
 
 def make_message(message, heading="Grapefruit Coach", **kwargs):
     body = env.get_template("message.html.jinja").render(message_title=heading, message_html=message)
