@@ -48,6 +48,6 @@ def get_static(filename):
         with open(filepath,"rb") as f:
             body = f.read()
             content_type = get_content_type(filename, body)
-            return make_response(body=base64.b64encode(body), headers={"Content-Type": content_type}, base64=True)
+            return make_response(body=base64.b64encode(body).decode("utf-8"), headers={"Content-Type": content_type}, base64=True)
     else:
         return make_response("404!!1!", code=404)
