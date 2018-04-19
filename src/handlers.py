@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import sys
 
 root = logging.getLogger()
@@ -13,6 +14,12 @@ root.addHandler(ch)
 
 for noisy in ('botocore', 'boto3', 'requests'):
     logging.getLogger(noisy).level = logging.WARN
+
+try:
+    with open("/var/task/static_config.json") as f:
+        os.environ.update(json.load(f))
+except:
+    logging.exception("Unable to add static info to the path.  Falling back to the bundled defaults.")
 
 import api_stuff
 import s3_stuff

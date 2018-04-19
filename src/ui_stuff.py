@@ -55,6 +55,10 @@ def get_params(template_name, event=None, **kwargs):
         # if "execute-api" in host:
         #     stage = event.get("requestContext", {}).get("stage","")
         #     params["base_path"] = "/{}".format(stage)
+    if "STATIC_BUCKET" in os.environ and "STATIC_PATH" in os.environ:
+        params["static_base"] = "https://s3.amazonaws.com/{STATIC_BUCKET}/{STATIC_PATH}".format(**os.environ)
+    else:
+        params["static_base"] = params["base_path"]
     params.update(kwargs)
     return params
 
