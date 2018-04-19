@@ -47,11 +47,12 @@ def get_content_type(fname, body=None):
 
 def get_params(template_name, event=None, **kwargs):
     params = {"base_path":""}
-    host = event.get("headers",{}).get("Host", None)
-    stage = event.get("requestContext", {}).get("stage","")
-    if "execute-api" in host:
-        params["base_path"] = "/{}".format(stage)
-
+    if event:
+        host = event.get("headers",{}).get("Host", None)
+        # Need to improve this logic a bit, but it works for the ones I'm currently using.
+        if "execute-api" in host:
+            stage = event.get("requestContext", {}).get("stage","")
+            params["base_path"] = "/{}".format(stage)
     params.update(kwargs)
     return params
 
@@ -89,4 +90,4 @@ def image_list(next_token=None, event=None, **kwargs):
     scan_response = Image.scan(NextToken=next_token)
     images = scan_response["Items"]
     next_next_token = scan_response.get("NextToken")
-    return get_page(template_name="images.html", images=images, next_token=next_next_token)
+    return get_page(template_name="images.html", images=images, next_token=next_next_token, event=event)
