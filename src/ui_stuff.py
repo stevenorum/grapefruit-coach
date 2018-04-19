@@ -27,6 +27,19 @@ content_types = {
     "json":"application/json",
     }
 
+binary_types = [
+    "image/jpg",
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/bmp",
+    "image/tiff",
+    "font/ttf",
+    "application/vnd.ms-fontobject",
+    "application/x-font-woff",
+    "application/x-font-otf",
+]
+
 def get_content_type(fname, body=None):
     return content_types.get(fname.split(".")[-1].lower(),"binary/octet-stream")
 
@@ -45,9 +58,15 @@ def get_page(template_name, event=None):
 def get_static(filename):
     filepath = os.path.abspath(os.path.join("/var/task",filename))
     if os.path.isfile(filepath) and filepath.startswith("/var/task/static/"):
-        with open(filepath,"rb") as f:
-            body = f.read()
-            content_type = get_content_type(filename, body)
-            return make_response(body=base64.b64encode(body).decode("utf-8"), headers={"Content-Type": content_type}, base64=True)
+        content_type = get_content_type(filename)
+        b64encoded = False
+        if content_type in binary_types:
+            with open(filepath,"rb") as f:
+                body = base64.b64encode(f.read()).decode("utf-8")
+                b64encoded = True
+        else:
+            with open(filepath,"r") as f:
+                body = f.read()
+        return make_response(body=body, headers={"Content-Type": content_type}, base64=b64encoded)
     else:
         return make_response("404!!1!", code=404)
