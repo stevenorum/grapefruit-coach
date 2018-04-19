@@ -7,6 +7,7 @@ MATCHERS = [
     PathMatcher(r"^/?$", ui_stuff.get_page, {"template_name":"index.html"}),
     PathMatcher(r"^/?(?P<filename>static/.*)$", ui_stuff.get_static),
     PathMatcher(r"^/?(?P<template_name>[-0-9a-zA-Z_]*.htm(l)?)$", ui_stuff.get_page),
+    PathMatcher(r"^/?images/?$", ui_stuff.image_list),
     PathMatcher(r"^/?images/(?P<next_token>[-_0-9a-zA-Z=%]*)$", ui_stuff.image_list),
     PathMatcher(r".*debug.*", ui_stuff.make_debug),
 ]

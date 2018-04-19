@@ -3,6 +3,7 @@ import json
 import os
 
 from jinja2 import Environment, FileSystemLoader
+from orm import Image
 from response_core import make_response
 
 env = Environment(loader=FileSystemLoader('/var/task/jinja_templates/'))
@@ -79,11 +80,12 @@ def get_static(filename, event=None, **kwargs):
 
 def make_debug(event, **kwargs):
     return make_response(body="<pre>\n{}\n</pre>".format(json.dumps(event, indent=2, sort_keys=True)))
-    
+
 def make_404(event=None, **kwargs):
     return make_message("<p>I have no idea what you're talking about.</p>", heading="HTTP/404 !!1!", code=404)
 
 def image_list(next_token=None, event=None, **kwargs):
+    next_token = None if not next_token else next_token.strip("/")
     scan_response = Image.scan(NextToken=next_token)
     images = scan_response["Items"]
     next_next_token = scan_response.get("NextToken")
