@@ -98,3 +98,9 @@ def image_list(next_token=None, event=None, **kwargs):
     print("Images found: {}".format(", ".join(image.image_name for image in images)))
     next_next_token = scan_response.get("NextToken")
     return get_page(template_name="images.html", images=images, next_token=next_next_token, event=event)
+
+def image_show(image_name, event=None, **kwargs):
+    image = Image(image_name=image_name)
+    if not image._in_db:
+        return make_404(event)
+    return get_page(template_name="image.html", image=image, event=event)

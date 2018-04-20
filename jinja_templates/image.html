@@ -1,0 +1,12 @@
+{% extends "base.html.jinja" %}
+{% block body %}
+<section id="three" class="wrapper">
+    <div class="inner">
+        <header class="align-center">
+            <h2>Image</h2>
+            <p>Here's that image you asked for.</p>
+        </header>
+        <p><image src="{{ image._temp_url }}" alt="{{ image.image_name }}"/></p>
+    </div>
+</section>
+{% endblock %}
