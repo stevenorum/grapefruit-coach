@@ -17,7 +17,9 @@ for noisy in ('botocore', 'boto3', 'requests'):
 
 try:
     with open("/var/task/static_config.json") as f:
-        os.environ.update(json.load(f))
+        data = json.load(f)
+        for k in data:
+            os.environ[k] = data[k].strip()
 except:
     logging.exception("Unable to add static info to the path.  Falling back to the bundled defaults.")
 

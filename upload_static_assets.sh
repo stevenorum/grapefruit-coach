@@ -7,6 +7,7 @@ hash_errything() {
 }
 
 CHECKSUM=$(hash_errything | md5sum)
+CHECKSUM=${CHECKSUM%% -}
 
 aws s3 sync static s3://$STATIC_BUCKET/$CHECKSUM/static
 
