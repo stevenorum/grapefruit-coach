@@ -6,7 +6,11 @@
             <h2>Image</h2>
             <p>Here's that image you asked for.</p>
         </header>
-        <p><image src="{{ image._temp_url }}" alt="{{ image.image_name }}"/></p>
+        <p>
+          <div class="imgbox">
+            <img class="center-fit" src="{{ image._temp_url }}" alt="{{ image.image_name }}"/>
+          </div>
+        </p>
     </div>
 </section>
 {% endblock %}
