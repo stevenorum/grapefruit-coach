@@ -81,9 +81,8 @@
                         {
                             "Effect": "Allow",
                             "Resource": [
-                                {
-                                    "Fn::Sub": "arn:${AWS::Partition}:s3:::${CodeBuildArtifactBucket}/*"
-                                }
+                                {"Fn::Sub": "arn:${AWS::Partition}:s3:::${CodeBuildArtifactBucket}/*"},
+                                {"Fn::Sub": "arn:${AWS::Partition}:s3:::${StaticAssetBucket}/*"}
                             ],
                             "Action": [
                                 "s3:PutObject",
