@@ -6,7 +6,7 @@ hash_errything() {
     done
 }
 
-CHECKSUM=$(hash_errything | md5sum | grep -o "[0-9a-f]{32}")
+CHECKSUM=$(hash_errything | md5sum | grep -o "[0-9a-f]\{32\}")
 echo "Checksum: '$CHECKSUM'"
 
 aws s3 sync static s3://$STATIC_BUCKET/$CHECKSUM/static
