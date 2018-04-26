@@ -3,18 +3,19 @@
 <link rel="stylesheet" type="text/css" href="{{ static_base }}/static/css/imgareaselect-default.css" />
 <script type="text/javascript" src="{{ static_base }}/static/js/jquery.min.js"></script>
 <script type="text/javascript" src="{{ static_base }}/static/js/jquery.imgareaselect.pack.js"></script>
+{% endblock %}
+
+{% block body %}
 <script type="text/javascript">
 $(document).ready(function () {
-    $('#trainingphoto').imgAreaSelect({
+    $('img#trainingphoto').imgAreaSelect({
         handles: true,
         maxWidth: 200,
         maxHeight: 150
     });
 });
 </script>
-{% endblock %}
 
-{% block body %}
 <section id="three" class="wrapper">
     <div class="inner">
         <header class="align-center">
@@ -23,7 +24,8 @@ $(document).ready(function () {
         </header>
         <p>
           <div class="imgbox">
-            <img id="trainingphoto" class="center-fit" src="{{ image._temp_url }}" alt="{{ image.image_name }}"/>
+            <!-- <img id="trainingphoto" class="center-fit" src="{{ image._temp_url }}" alt="{{ image.image_name }}"/> -->
+            <img id="trainingphoto" src="{{ image._temp_url }}" alt="{{ image.image_name }}"/>
           </div>
         </p>
     </div>
