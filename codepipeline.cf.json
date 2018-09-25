@@ -23,6 +23,24 @@
             "Type": "Number",
             "Description": "Max time for the build to take, in minutes.",
             "Default": 5
+        },
+        "ChildStackName": {
+            "Type": "String",
+            "Description": "Name of the stack this will create.  Defaults to <PackageName>-<PackageBranch>",
+            "Default": ""
+        },
+        "BuildImage": {
+            "Type": "String",
+            "Description": "Docker build image to use for this stack.",
+            "Default": ""
+        }
+    },
+    "Conditions":{
+        "ChildStackNameProvided":{
+            "Fn::Not":[{"Fn::Equals":["",{"Ref":"ChildStackName"}]}]
+        },
+        "BuildImageProvided":{
+            "Fn::Not":[{"Fn::Equals":["",{"Ref":"BuildImage"}]}]
         }
     },
     "Resources": {
@@ -43,10 +61,10 @@
                 "Bucket" : {"Ref" : "StaticAssetBucket"},
                 "PolicyDocument": {
                     "Statement":[{
-	                "Action":["s3:GetObject"],
-	                "Effect":"Allow",
-	                "Resource": { "Fn::Sub" : "arn:${AWS::Partition}:s3:::${StaticAssetBucket}/*"},
-	                "Principal":"*"
+                        "Action":["s3:GetObject"],
+                        "Effect":"Allow",
+                        "Resource": { "Fn::Sub" : "arn:${AWS::Partition}:s3:::${StaticAssetBucket}/*"},
+                        "Principal":"*"
                     }]
                 }
             }
@@ -98,6 +116,18 @@
                             "Resource": {
                                 "Fn::Sub": "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/CodeBuild/*"
                             }
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "ecr:Get*",
+                                "ecr:Describe*",
+                                "ecr:List*",
+                                "ecr:GetDownloadUrlForLayer",
+                                "ecr:BatchGetImage",
+                                "ecr:BatchCheckLayerAvailability"
+                            ],
+                            "Resource": "*"
                         }
                     ]
                 }
@@ -147,15 +177,16 @@
                                 "s3:*",
                                 "sns:*",
                                 "ecs:*",
+                                "ec2:*",
+                                "events:*",
+                                "autoscaling:*",
                                 "logs:*",
                                 "lambda:*",
                                 "cloudformation:*",
                                 "apigateway:*",
-                                "iam:PassRole",
-                                "iam:CreatePolicy",
-                                "iam:CreateRole",
-                                "iam:DeletePolicy",
-                                "iam:DeleteRole"
+                                "dynamodb:*",
+                                "states:*",
+                                "iam:*"
                             ],
                             "Resource": "*",
                             "Effect": "Allow"
@@ -182,36 +213,6 @@
                             "Resource": {
                                 "Fn::Sub": "arn:${AWS::Partition}:s3:::${CodeBuildArtifactBucket}/*"
                             },
-                            "Effect": "Allow"
-                        },
-                        {
-                            "Action": [
-                                "iam:PassRole",
-                                "iam:GetRole",
-                                "iam:CreateRole",
-                                "iam:DeleteRole",
-                                "iam:PutRolePolicy",
-                                "iam:AttachRolePolicy",
-                                "iam:DeleteRolePolicy",
-                                "iam:DetachRolePolicy"
-                            ],
-                            "Resource": [
-                                {
-                                    "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*"
-                                }
-                            ],
-                            "Effect": "Allow"
-                        },
-                        {
-                            "Action": [
-                                "iam:CreatePolicy",
-                                "iam:DeletePolicy"
-                            ],
-                            "Resource": [
-                                {
-                                    "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/*"
-                                }
-                            ],
                             "Effect": "Allow"
                         },
                         {
@@ -266,12 +267,16 @@
                             "Action": [
                                 "cloudwatch:*",
                                 "s3:*",
+                                "ec2:*",
+                                "events:*",
+                                "autoscaling:*",
                                 "logs:*",
                                 "lambda:*",
+                                "dynamodb:*",
+                                "states:*",
                                 "cloudformation:*",
                                 "apigateway:*",
-                                "dynamodb:*",
-                                "ses:*"
+                                "iam:*"
                             ],
                             "Resource": "*",
                             "Effect": "Allow"
@@ -345,7 +350,11 @@
                 },
                 "Environment": {
                     "ComputeType": "BUILD_GENERAL1_SMALL",
-                    "Image": "aws/codebuild/eb-python-3.4-amazonlinux-64:2.3.2",
+                    "Image":{"Fn::If":[
+                        "BuildImageProvided",
+                        {"Ref":"BuildImage"},
+                        {"Fn::ImportValue":"amazonlinux-codebuild-image-cetacea"}
+                    ]},
                     "PrivilegedMode": false,
                     "Type": "LINUX_CONTAINER",
                     "EnvironmentVariables": [
@@ -494,11 +503,13 @@
                                 },
                                 "Configuration": {
                                     "ActionMode": "CHANGE_SET_REPLACE",
-                                    "StackName": {
-                                        "Fn::Sub": "${AWS::StackName}-LambdaFunction"
-                                    },
+                                    "StackName": {"Fn::If":[
+                                        "ChildStackNameProvided",
+                                        {"Ref":"ChildStackName"},
+                                        {"Fn::Sub": "${PackageName}-${PackageBranch}"}
+                                    ]},
                                     "ChangeSetName": {
-                                        "Fn::Sub": "${AWS::StackName}-LambdaFunction-ChangeSet"
+                                        "Fn::Sub": "${PackageName}-${PackageBranch}-ChangeSet"
                                     },
                                     "RoleArn": {
                                         "Fn::GetAtt": [
@@ -531,12 +542,14 @@
                                 },
                                 "Configuration": {
                                     "ActionMode": "CHANGE_SET_EXECUTE",
-                                    "StackName": {
-                                        "Fn::Sub": "${AWS::StackName}-LambdaFunction"
-                                    },
+                                    "StackName": {"Fn::If":[
+                                        "ChildStackNameProvided",
+                                        {"Ref":"ChildStackName"},
+                                        {"Fn::Sub": "${PackageName}-${PackageBranch}"}
+                                    ]},
                                     "ChangeSetName": {
-                                        "Fn::Sub": "${AWS::StackName}-LambdaFunction-ChangeSet"
-                                    }
+                                        "Fn::Sub": "${PackageName}-${PackageBranch}-ChangeSet"
+                                    },
                                 },
                                 "InputArtifacts": [
                                     {

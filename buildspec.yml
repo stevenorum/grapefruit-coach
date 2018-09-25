@@ -5,14 +5,13 @@ phases:
       - pwd
       - env
       - ls
-      - false
-      - bash scripts/install_dependencies.sh
+      - bash /root/scripts/install_dependencies.sh
   pre_build:
     commands:
-      - bash scripts/setup_build_dir.sh
+      - bash /root/scripts/setup_build_dir.sh
   build:
     commands:
-      - bash scripts/bundle_lambda.sh
+      - bash /root/scripts/bundle_lambda.sh
 artifacts:
   files:
     - NewSamTemplate.json
