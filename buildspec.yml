@@ -1,26 +1,19 @@
-version: 0.1
+version: 0.2
 phases:
   install:
     commands:
-      - pip install awscli --upgrade
-      - yum install -y python36-devel tree
-      - pip3 install --upgrade pip
-      - pip3 install awscli --upgrade
+      - pwd
+      - env
+      - ls
+      - false
+      - bash scripts/install_dependencies.sh
   pre_build:
     commands:
-      - mkdir build
-      - bash upload_static_assets.sh build/static_config.json
-      - cp -r src/* build/
-      - cp -r static build/
-      - cp -r jinja_templates build/
-      - cp SamTemplate.json build/
-      - touch requirements.txt
-      - pip3 install -t build/ -r requirements.txt
+      - bash scripts/setup_build_dir.sh
   build:
     commands:
-      - aws cloudformation package --template-file SamTemplate.json --s3-bucket $S3_BUCKET --output-template-file NewSamTemplate.json --use-json
+      - bash scripts/bundle_lambda.sh
 artifacts:
-  type: zip
   files:
     - NewSamTemplate.json
   discard-paths: yes
